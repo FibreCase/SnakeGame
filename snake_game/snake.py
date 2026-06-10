@@ -135,6 +135,25 @@ class SnakeGame:
         elif command == "reset":
             self.reset_game()
             return "OK"
+        elif command == "full_status":
+            snake_positions = str(self.snake).replace(" ", "")
+            food_pos = f"({self.food[0]},{self.food[1]})"
+            return f"score={self.score},direction={self.direction},game_over={self.game_over},snake={snake_positions},food={food_pos}"
+        elif command == "snake":
+            snake_positions = str(self.snake).replace(" ", "")
+            return snake_positions
+        elif command == "food":
+            return f"({self.food[0]},{self.food[1]})"
+        elif command == "step":
+            if not self.game_over:
+                self.move_snake()
+                self.draw_snake()
+                self.draw_food()
+                return "OK"
+            else:
+                return "ERROR: Game over"
+        elif command == "info":
+            return f"canvas_width={self.canvas_width},canvas_height={self.canvas_height},cell_size={self.cell_size}"
         else:
             return "ERROR: Unknown command"
     

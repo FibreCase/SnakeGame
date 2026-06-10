@@ -20,7 +20,12 @@ if __name__ == "__main__":
         print("Usage: python snake_client.py <command>")
         print("Commands:")
         print("  up, down, left, right - Control snake direction")
-        print("  status - Get game status")
+        print("  status - Get basic game status")
+        print("  full_status - Get complete game status (snake positions, food position)")
+        print("  snake - Get snake body positions")
+        print("  food - Get food position")
+        print("  step - Execute one game step")
+        print("  info - Get game canvas info")
         print("  reset - Reset game")
         sys.exit(1)
     

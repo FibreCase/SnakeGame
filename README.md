@@ -69,7 +69,12 @@ uv run python main.py
 | `down` | 向下移动 | `echo "down" \| nc -U /tmp/snake_game.sock` |
 | `left` | 向左移动 | `echo "left" \| nc -U /tmp/snake_game.sock` |
 | `right` | 向右移动 | `echo "right" \| nc -U /tmp/snake_game.sock` |
-| `status` | 获取游戏状态 | `echo "status" \| nc -U /tmp/snake_game.sock` |
+| `status` | 获取基本状态 | `echo "status" \| nc -U /tmp/snake_game.sock` |
+| `full_status` | 获取完整状态（蛇身位置、食物位置） | `echo "full_status" \| nc -U /tmp/snake_game.sock` |
+| `snake` | 获取蛇身体所有位置 | `echo "snake" \| nc -U /tmp/snake_game.sock` |
+| `food` | 获取食物位置 | `echo "food" \| nc -U /tmp/snake_game.sock` |
+| `step` | 执行单步运行 | `echo "step" \| nc -U /tmp/snake_game.sock` |
+| `info` | 获取画布信息 | `echo "info" \| nc -U /tmp/snake_game.sock` |
 | `reset` | 重置游戏 | `echo "reset" \| nc -U /tmp/snake_game.sock` |
 
 ### 使用Python客户端
@@ -93,8 +98,13 @@ def send_command(command):
     client.close()
     return response
 
-print(send_command("status"))  # 输出: score=0,direction=Right,game_over=False
-send_command("up")             # 控制蛇向上移动
+print(send_command("status"))      # 输出: score=0,direction=Right,game_over=False
+send_command("up")                 # 控制蛇向上移动
+print(send_command("full_status")) # 输出完整状态
+print(send_command("snake"))       # 输出蛇身位置: [(100,100),(80,100),(60,100)]
+print(send_command("food"))        # 输出食物位置: (200,200)
+send_command("step")               # 执行单步
+print(send_command("info"))        # 输出画布信息
 ```
 
 ## 技术栈
