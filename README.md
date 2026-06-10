@@ -2,12 +2,11 @@
 
 > 本项目用于学习 Vibe Code，使用 Trae + Qwen3-Coder:30B 开发。
 
-一个基于 Python 的贪吃蛇小游戏，支持人类玩家、AI自动控制和Unix socket远程控制。
+一个基于 Python 的贪吃蛇小游戏，支持人类玩家和Unix socket远程控制。
 
 ## 功能特性
 
 - 🎮 **人类玩家模式**：使用键盘方向键控制蛇的移动
-- 🤖 **AI自动控制**：内置AI控制器，自动寻找最短路径吃食物
 - 🔌 **Unix Socket接口**：支持外部程序通过socket控制游戏
 - 🎨 **视觉效果**：蛇身显示不同深浅的绿色渐变
 - 🔄 **穿墙效果**：蛇撞墙后从另一侧出现
@@ -22,7 +21,6 @@ trae-test/
 ├── uv.lock                    # 依赖锁文件
 └── snake_game/                # 游戏模块
     ├── snake.py               # 游戏核心逻辑
-    ├── ai_controller.py       # AI自动控制器
     ├── snake_client.py        # Socket客户端工具
     └── SOCKET_API.md          # Socket接口文档
 ```
@@ -45,16 +43,6 @@ uv run python main.py
 ```
 
 使用键盘方向键（↑↓←→）控制蛇的移动。
-
-#### AI自动控制模式
-
-```bash
-# 默认AI速度
-uv run python main.py --ai
-
-# 自定义AI控制延迟（秒）
-uv run python main.py --ai --ai-delay 0.15
-```
 
 ## 游戏玩法
 
@@ -109,15 +97,6 @@ print(send_command("status"))  # 输出: score=0,direction=Right,game_over=False
 send_command("up")             # 控制蛇向上移动
 ```
 
-## AI控制器
-
-AI控制器使用曼哈顿距离算法寻找最短路径：
-
-1. **状态获取**：获取蛇的位置、食物位置和游戏状态
-2. **安全检测**：排除会导致碰撞的方向
-3. **路径选择**：选择距离食物最近的安全方向
-4. **自动重置**：游戏结束后自动重新开始
-
 ## 技术栈
 
 - Python 3.13
@@ -130,14 +109,13 @@ AI控制器使用曼哈顿距离算法寻找最短路径：
 ### 添加新功能
 
 1. 修改 `snake_game/snake.py` 添加游戏逻辑
-2. 修改 `snake_game/ai_controller.py` 添加AI策略
-3. 更新 `snake_game/SOCKET_API.md` 文档
+2. 更新 `snake_game/SOCKET_API.md` 文档
 
 ### 测试
 
 ```bash
 # 运行游戏测试
-uv run python main.py --ai
+uv run python main.py
 
 # 测试socket接口
 uv run python snake_game/snake_client.py status
