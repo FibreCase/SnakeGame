@@ -8,7 +8,7 @@ import json
 SOCKET_PATH = "/tmp/snake_game.sock"
 
 class SnakeGame:
-    def __init__(self, root):
+    def __init__(self, root, controlled=False):
         self.root = root
         self.root.title("贪吃蛇游戏")
         
@@ -16,6 +16,7 @@ class SnakeGame:
         self.canvas_height = 600
         self.cell_size = 20
         self.speed = 150
+        self.controlled = controlled
         
         self.canvas = tk.Canvas(root, width=self.canvas_width, height=self.canvas_height, bg="black")
         self.canvas.pack()
@@ -31,7 +32,8 @@ class SnakeGame:
         self.socket_server = threading.Thread(target=self.start_socket_server, daemon=False)
         self.socket_server.start()
         
-        self.game_loop()
+        if not self.controlled:
+            self.game_loop()
     
     def reset_game(self):
         self.snake = [(100, 100), (80, 100), (60, 100)]
@@ -176,6 +178,26 @@ class SnakeGame:
             else:
                 response["success"] = False
                 response["error"] = "Game over"
+        elif cmd == "next_step":
+            if self.controlled:
+                if not self.game_over:
+                    self.move_snake()
+                    self.draw_snake()
+                    self.draw_food()
+                    response["message"] = "Next step executed"
+                    response["data"] = {
+                        "score": self.score,
+                        "direction": self.direction,
+                        "game_over": self.game_over,
+                        "snake": self.snake,
+                        "food": list(self.food)
+                    }
+                else:
+                    response["success"] = False
+                    response["error"] = "Game over"
+            else:
+                response["success"] = False
+                response["error"] = "Not in controlled mode"
         elif cmd == "info":
             response["data"] = {
                 "canvas_width": self.canvas_width,

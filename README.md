@@ -44,6 +44,16 @@ uv run python main.py
 
 使用键盘方向键（↑↓←→）控制蛇的移动。
 
+### 受控模式
+
+在受控模式下，蛇不会自动移动，只有通过socket发送`next_step`命令时才会移动一步：
+
+```bash
+uv run python main.py --controlled
+```
+
+受控模式适合AI训练或远程控制场景，允许外部程序精确控制每一步。
+
 ## 游戏玩法
 
 - 🐍 **目标**：控制蛇吃到红色食物，避免撞到自己
@@ -74,6 +84,7 @@ uv run python main.py
 | `snake` | 获取蛇身体所有位置 | `echo "snake" \| nc -U /tmp/snake_game.sock` |
 | `food` | 获取食物位置 | `echo "food" \| nc -U /tmp/snake_game.sock` |
 | `step` | 执行单步运行 | `echo "step" \| nc -U /tmp/snake_game.sock` |
+| `next_step` | 执行下一步（仅受控模式） | `echo "next_step" \| nc -U /tmp/snake_game.sock` |
 | `info` | 获取画布信息 | `echo "info" \| nc -U /tmp/snake_game.sock` |
 | `reset` | 重置游戏 | `echo "reset" \| nc -U /tmp/snake_game.sock` |
 

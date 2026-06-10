@@ -36,6 +36,7 @@ if __name__ == "__main__":
         print("  snake - Get snake body positions")
         print("  food - Get food position")
         print("  step - Execute one game step")
+        print("  next_step - Execute next step (only in controlled mode)")
         print("  info - Get game canvas info")
         print("  reset - Reset game")
         sys.exit(1)
