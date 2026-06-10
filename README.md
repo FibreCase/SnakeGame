@@ -89,22 +89,64 @@ uv run python snake_game/snake_client.py reset
 
 ```python
 import socket
+import json
 
 def send_command(command):
     client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     client.connect('/tmp/snake_game.sock')
-    client.sendall(command.encode('utf-8'))
-    response = client.recv(1024).decode('utf-8')
+    
+    # 发送JSON格式请求
+    request = json.dumps({"command": command})
+    client.sendall(request.encode('utf-8'))
+    
+    response = client.recv(4096).decode('utf-8')
     client.close()
-    return response
+    
+    # 返回JSON解析后的字典
+    return json.loads(response)
 
-print(send_command("status"))      # 输出: score=0,direction=Right,game_over=False
-send_command("up")                 # 控制蛇向上移动
-print(send_command("full_status")) # 输出完整状态
-print(send_command("snake"))       # 输出蛇身位置: [(100,100),(80,100),(60,100)]
-print(send_command("food"))        # 输出食物位置: (200,200)
-send_command("step")               # 执行单步
-print(send_command("info"))        # 输出画布信息
+# 获取状态
+result = send_command("full_status")
+print(result)
+# 输出: {"success": true, "data": {"score": 0, "direction": "Right", "game_over": false, "snake": [[100,100],...], "food": [200,200]}}
+
+# 控制方向
+send_command("up")
+
+# 执行单步
+result = send_command("step")
+print(result["data"]["snake"])
+```
+
+### JSON请求格式
+
+```json
+{"command": "full_status"}
+```
+
+### JSON响应格式
+
+成功响应：
+```json
+{
+  "success": true,
+  "message": "Step executed",
+  "data": {
+    "score": 0,
+    "direction": "Right",
+    "game_over": false,
+    "snake": [[280, 100], [260, 100], [240, 100]],
+    "food": [20, 400]
+  }
+}
+```
+
+失败响应：
+```json
+{
+  "success": false,
+  "error": "Unknown command"
+}
 ```
 
 ## 技术栈

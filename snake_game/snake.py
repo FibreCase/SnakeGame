@@ -3,6 +3,7 @@ import random
 import socket
 import threading
 import os
+import json
 
 SOCKET_PATH = "/tmp/snake_game.sock"
 
@@ -116,46 +117,76 @@ class SnakeGame:
             self.direction = "Down"
     
     def handle_command(self, command):
-        command = command.strip().lower()
+        try:
+            request = json.loads(command)
+            cmd = request.get("command", "").lower()
+            is_json = True
+        except json.JSONDecodeError:
+            cmd = command.strip().lower()
+            is_json = False
         
-        if command == "up":
+        response = {"success": True}
+        
+        if cmd == "up":
             self.direction = "Up"
-            return "OK"
-        elif command == "down":
+            response["message"] = "Direction changed to Up"
+        elif cmd == "down":
             self.direction = "Down"
-            return "OK"
-        elif command == "left":
+            response["message"] = "Direction changed to Down"
+        elif cmd == "left":
             self.direction = "Left"
-            return "OK"
-        elif command == "right":
+            response["message"] = "Direction changed to Left"
+        elif cmd == "right":
             self.direction = "Right"
-            return "OK"
-        elif command == "status":
-            return f"score={self.score},direction={self.direction},game_over={self.game_over}"
-        elif command == "reset":
+            response["message"] = "Direction changed to Right"
+        elif cmd == "status":
+            response["data"] = {
+                "score": self.score,
+                "direction": self.direction,
+                "game_over": self.game_over
+            }
+        elif cmd == "reset":
             self.reset_game()
-            return "OK"
-        elif command == "full_status":
-            snake_positions = str(self.snake).replace(" ", "")
-            food_pos = f"({self.food[0]},{self.food[1]})"
-            return f"score={self.score},direction={self.direction},game_over={self.game_over},snake={snake_positions},food={food_pos}"
-        elif command == "snake":
-            snake_positions = str(self.snake).replace(" ", "")
-            return snake_positions
-        elif command == "food":
-            return f"({self.food[0]},{self.food[1]})"
-        elif command == "step":
+            response["message"] = "Game reset"
+        elif cmd == "full_status":
+            response["data"] = {
+                "score": self.score,
+                "direction": self.direction,
+                "game_over": self.game_over,
+                "snake": self.snake,
+                "food": list(self.food)
+            }
+        elif cmd == "snake":
+            response["data"] = {"snake": self.snake}
+        elif cmd == "food":
+            response["data"] = {"food": list(self.food)}
+        elif cmd == "step":
             if not self.game_over:
                 self.move_snake()
                 self.draw_snake()
                 self.draw_food()
-                return "OK"
+                response["message"] = "Step executed"
+                response["data"] = {
+                    "score": self.score,
+                    "direction": self.direction,
+                    "game_over": self.game_over,
+                    "snake": self.snake,
+                    "food": list(self.food)
+                }
             else:
-                return "ERROR: Game over"
-        elif command == "info":
-            return f"canvas_width={self.canvas_width},canvas_height={self.canvas_height},cell_size={self.cell_size}"
+                response["success"] = False
+                response["error"] = "Game over"
+        elif cmd == "info":
+            response["data"] = {
+                "canvas_width": self.canvas_width,
+                "canvas_height": self.canvas_height,
+                "cell_size": self.cell_size
+            }
         else:
-            return "ERROR: Unknown command"
+            response["success"] = False
+            response["error"] = "Unknown command"
+        
+        return json.dumps(response)
     
     def start_socket_server(self):
         if os.path.exists(SOCKET_PATH):
