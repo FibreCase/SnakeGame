@@ -1,5 +1,7 @@
 # 贪吃蛇游戏 (Snake Game)
 
+> 本项目用于学习 Vibe Code，使用 Trae + Qwen3-Coder:30B 开发。
+
 一个基于 Python 的贪吃蛇小游戏，支持人类玩家、AI自动控制和Unix socket远程控制。
 
 ## 功能特性
@@ -144,7 +146,3 @@ uv run python snake_game/snake_client.py status
 ## 许可证
 
 MIT License
-
-## 作者
-
-FibreCase <fibrecase@163.com>
