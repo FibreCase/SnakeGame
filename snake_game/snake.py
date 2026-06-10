@@ -15,6 +15,8 @@ class SnakeGame:
         self.canvas_width = 600
         self.canvas_height = 600
         self.cell_size = 20
+        self.grid_width = self.canvas_width // self.cell_size
+        self.grid_height = self.canvas_height // self.cell_size
         self.speed = 150
         self.controlled = controlled
         
@@ -36,7 +38,7 @@ class SnakeGame:
             self.game_loop()
     
     def reset_game(self):
-        self.snake = [(100, 100), (80, 100), (60, 100)]
+        self.snake = [(5, 5), (4, 5), (3, 5)]
         self.direction = "Right"
         self.food = self.generate_food()
         self.score = 0
@@ -45,8 +47,8 @@ class SnakeGame:
     
     def generate_food(self):
         while True:
-            x = random.randint(0, (self.canvas_width - self.cell_size) // self.cell_size) * self.cell_size
-            y = random.randint(0, (self.canvas_height - self.cell_size) // self.cell_size) * self.cell_size
+            x = random.randint(0, self.grid_width - 1)
+            y = random.randint(0, self.grid_height - 1)
             if (x, y) not in self.snake:
                 return (x, y)
     
@@ -57,17 +59,19 @@ class SnakeGame:
             ratio = i / (snake_length - 1) if snake_length > 1 else 0
             green = int(50 + ratio * 150)
             color = f"#{green:02x}{255:02x}{green:02x}"
+            x, y = segment
             self.canvas.create_rectangle(
-                segment[0], segment[1],
-                segment[0] + self.cell_size, segment[1] + self.cell_size,
+                x * self.cell_size, y * self.cell_size,
+                x * self.cell_size + self.cell_size, y * self.cell_size + self.cell_size,
                 fill=color, tags="snake"
             )
     
     def draw_food(self):
         self.canvas.delete("food")
+        x, y = self.food
         self.canvas.create_oval(
-            self.food[0], self.food[1],
-            self.food[0] + self.cell_size, self.food[1] + self.cell_size,
+            x * self.cell_size, y * self.cell_size,
+            x * self.cell_size + self.cell_size, y * self.cell_size + self.cell_size,
             fill="red", tags="food"
         )
     
@@ -75,22 +79,22 @@ class SnakeGame:
         head_x, head_y = self.snake[0]
         
         if self.direction == "Right":
-            new_head = (head_x + self.cell_size, head_y)
+            new_head = (head_x + 1, head_y)
         elif self.direction == "Left":
-            new_head = (head_x - self.cell_size, head_y)
+            new_head = (head_x - 1, head_y)
         elif self.direction == "Up":
-            new_head = (head_x, head_y - self.cell_size)
+            new_head = (head_x, head_y - 1)
         elif self.direction == "Down":
-            new_head = (head_x, head_y + self.cell_size)
+            new_head = (head_x, head_y + 1)
         
         if new_head[0] < 0:
-            new_head = (self.canvas_width - self.cell_size, new_head[1])
-        elif new_head[0] >= self.canvas_width:
+            new_head = (self.grid_width - 1, new_head[1])
+        elif new_head[0] >= self.grid_width:
             new_head = (0, new_head[1])
         
         if new_head[1] < 0:
-            new_head = (new_head[0], self.canvas_height - self.cell_size)
-        elif new_head[1] >= self.canvas_height:
+            new_head = (new_head[0], self.grid_height - 1)
+        elif new_head[1] >= self.grid_height:
             new_head = (new_head[0], 0)
         
         if new_head in self.snake:
