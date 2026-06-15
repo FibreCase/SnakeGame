@@ -5,10 +5,10 @@ import threading
 import os
 import json
 
-SOCKET_PATH = "/tmp/snake_game.sock"
+DEFAULT_SOCKET_PATH = "/tmp/snake_game.sock"
 
 class SnakeGame:
-    def __init__(self, root, controlled=False):
+    def __init__(self, root, controlled=False, socket_path=DEFAULT_SOCKET_PATH):
         self.root = root
         self.root.title("贪吃蛇游戏")
         
@@ -19,6 +19,7 @@ class SnakeGame:
         self.grid_height = self.canvas_height // self.cell_size
         self.speed = 150
         self.controlled = controlled
+        self.socket_path = socket_path
         
         self.canvas = tk.Canvas(root, width=self.canvas_width, height=self.canvas_height, bg="black")
         self.canvas.pack()
@@ -215,15 +216,15 @@ class SnakeGame:
         return json.dumps(response)
     
     def start_socket_server(self):
-        if os.path.exists(SOCKET_PATH):
-            os.remove(SOCKET_PATH)
+        if os.path.exists(self.socket_path):
+            os.remove(self.socket_path)
         
         server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        server.bind(SOCKET_PATH)
+        server.bind(self.socket_path)
         server.listen(5)
         
-        print(f"Unix socket server started at {SOCKET_PATH}")
+        print(f"Unix socket server started at {self.socket_path}")
         
         while True:
             try:
