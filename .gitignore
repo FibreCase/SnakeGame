@@ -8,3 +8,38 @@ wheels/
 
 # Virtual environments
 .venv
+.env
+.venv/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# System files
+.DS_Store
+*~
+._*
+
+# Logs and temp files
+*.log
+*.tmp
+temp/
+logs/
+
+# Socket files (if any)
+/tmp/snake_game.sock
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+
+# Build artifacts
+*.pyc
+__pycache__/
+
+# Test files
+.pytest_cache/

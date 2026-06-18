@@ -18,15 +18,20 @@ left   - 向左移动
 right  - 向右移动
 ```
 
-### 2. 游戏状态
+### 2. 游戏状态查询
 ```
-status - 获取当前游戏状态
-        返回格式: score=分数,direction=方向,game_over=是否结束
+status        - 获取基本游戏状态 (分数、方向、是否结束)
+full_status   - 获取完整游戏状态 (所有信息)
+snake         - 获取蛇身体所有位置
+food          - 获取食物位置
+info          - 获取画布信息 (宽度、高度、网格大小)
 ```
 
 ### 3. 游戏控制
 ```
-reset  - 重置游戏
+step          - 执行单步运行
+next_step     - 执行下一步 (仅受控模式下可用)
+reset         - 重置游戏
 ```
 
 ## 使用方法
@@ -36,6 +41,10 @@ reset  - 重置游戏
 echo "status" | nc -U /tmp/snake_game.sock
 echo "up" | nc -U /tmp/snake_game.sock
 echo "down" | nc -U /tmp/snake_game.sock
+echo "full_status" | nc -U /tmp/snake_game.sock
+echo "step" | nc -U /tmp/snake_game.sock
+echo "next_step" | nc -U /tmp/snake_game.sock
+echo "reset" | nc -U /tmp/snake_game.sock
 ```
 
 ### 方法2: 使用 Python 客户端
@@ -45,12 +54,20 @@ python snake_client.py
 
 # 获取状态
 python snake_client.py status
+python snake_client.py full_status
+python snake_client.py snake
+python snake_client.py food
+python snake_client.py info
 
 # 控制方向
 python snake_client.py up
 python snake_client.py down
 python snake_client.py left
 python snake_client.py right
+
+# 执行步骤控制
+python snake_client.py step
+python snake_client.py next_step
 
 # 重置游戏
 python snake_client.py reset
@@ -59,22 +76,69 @@ python snake_client.py reset
 ### 方法3: 在 Python 代码中使用
 ```python
 import socket
+import json
 
 SOCKET_PATH = "/tmp/snake_game.sock"
 
 def send_command(command):
     client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     client.connect(SOCKET_PATH)
-    client.sendall(command.encode('utf-8'))
-    response = client.recv(1024).decode('utf-8')
+    
+    # 发送JSON格式请求
+    request = json.dumps({"command": command})
+    client.sendall(request.encode('utf-8'))
+    
+    response = client.recv(4096).decode('utf-8')
     client.close()
-    return response.strip()
+    
+    # 返回JSON解析后的字典
+    return json.loads(response)
 
 # 使用示例
 print(send_command("status"))
+# 输出: {"success": true, "data": {"score": 0, "direction": "Right", "game_over": false}}
+
 send_command("up")
-send_command("right")
-send_command("reset")
+# 控制方向
+
+result = send_command("step")
+print(result["data"]["snake"])
+# 执行一步并查看蛇的位置
+
+result = send_command("full_status")
+print(result)
+# 输出: {"success": true, "data": {"score": 0, "direction": "Right", "game_over": false, "snake": [[100,100],...], "food": [200,200]}}
+```
+
+## JSON 请求格式
+
+```json
+{"command": "full_status"}
+```
+
+## JSON 响应格式
+
+成功响应：
+```json
+{
+  "success": true,
+  "message": "Step executed",
+  "data": {
+    "score": 0,
+    "direction": "Right",
+    "game_over": false,
+    "snake": [[280, 100], [260, 100], [240, 100]],
+    "food": [20, 400]
+  }
+}
+```
+
+失败响应：
+```json
+{
+  "success": false,
+  "error": "Unknown command"
+}
 ```
 
 ## 示例程序
@@ -128,6 +192,7 @@ if __name__ == "__main__":
 2. **并发连接**: socket服务器支持多个并发连接
 3. **命令格式**: 命令不区分大小写，但建议使用小写
 4. **错误处理**: 如果连接失败，请检查游戏是否正在运行
+5. **受控模式**: `next_step` 命令仅在受控模式下可用
 
 ## 故障排除
 
@@ -153,3 +218,4 @@ uv run python snake.py
 - socket服务器是守护线程，在游戏关闭时自动终止
 - 每个连接处理完成后立即关闭
 - 命令响应是同步的，客户端会等待服务器响应
+- 支持JSON格式的请求和响应
